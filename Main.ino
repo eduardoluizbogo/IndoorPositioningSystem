@@ -4,8 +4,8 @@
 #include <WebServer.h>
 
 // Substitua essas informações pelas suas credenciais de rede WiFi
-const char* ssid = "Koe";
-const char* password = "91046030";
+const char* ssid = "networkName";
+const char* password = "password";
 String strX = "30";
 String strY = "30";
 
@@ -41,7 +41,7 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("");
-  Serial.print("Conectado à rede WiFi ");
+  Serial.print("Connected to wifi network.");
   Serial.println(ssid);
   Serial.print("Endereço IP: ");
   Serial.println(WiFi.localIP());
@@ -52,7 +52,7 @@ void setup() {
 
   // Iniciar o servidor
   server.begin();
-  Serial.println("Servidor iniciado");
+  Serial.println("Server initialized.");
 }
 
 void handleRoot() {
@@ -84,14 +84,14 @@ void handleRoot() {
   html += "      x: {\r\n";
   html += "        type: 'linear',\r\n";
   html += "        position: 'bottom',\r\n";
-  html += "        min: 0,\r\n"; // Define o limite mínimo do eixo x
-  html += "        max: 5\r\n";  // Define o limite máximo do eixo x
+  html += "        min: 0,\r\n"; 
+  html += "        max: 5\r\n";
   html += "      },\r\n";
   html += "      y: {\r\n";
   html += "        type: 'linear',\r\n";
   html += "        position: 'left',\r\n";
-  html += "        min: 0,\r\n"; // Define o limite mínimo do eixo y
-  html += "        max: 10\r\n"; // Define o limite máximo do eixo y
+  html += "        min: 0,\r\n";
+  html += "        max: 10\r\n";
   html += "      }\r\n";
   html += "    }\r\n";
   html += "  }\r\n";
@@ -103,7 +103,7 @@ void handleRoot() {
   html += "      myChart.data.datasets[0].data = [{ x: data.x, y: data.y }];\r\n";
   html += "      myChart.update();\r\n";
   html += "    });\r\n";
-  html += "}, 5000);\r\n"; // Atualiza a cada 5 segundos
+  html += "}, 5000);\r\n";
   html += "</script>\r\n";
   html += "</body>\r\n";
   html += "</html>\r\n";
@@ -118,24 +118,13 @@ void handleData() {
 }
 
 void loop() {
-  float rssiBeacon1 = 0;
-  float rssiBeacon2 = 0;
-  float rssiBeacon3 = 0;
-  float a1 = 0;
-  float a2 = 0;
-  float a3 = 0;
-  float b1 = 0;
-  float b2 = 0;
-  float b3 = 0;
-  float d1 = 0;
-  float d2 = 0;
-  float d3 = 0;
-  float x1 = 0.8, y1 = 10.0;
-  float x2 = 4.75, y2 = 4.8;
-  float x3 = 1.1, y3 = 2.2;
+  
+  float rssiBeacon1 = 0, rssiBeacon2 = 0, rssiBeacon3 = 0;
+  float d1 = 0, d2 = 0, d3 = 0;
+  float x1 = 0.8, y1 = 10.0, x2 = 4.75, y2 = 4.8, x3 = 1.1, y3 = 2.2;
   float x, y;
 
-  BTScanResults* btDeviceList = SerialBT.getScanResults(); // maybe accessing from different threads!
+  BTScanResults* btDeviceList = SerialBT.getScanResults();
   if (SerialBT.discoverAsync([](BTAdvertisedDevice* pDevice) {
         Serial.printf("scan\n");
       }))
@@ -159,33 +148,25 @@ void loop() {
         {
           rssiBeacon3 = device->getRSSI();
         }
-      } // end for
-    }   // end if
+      }
+    }
 
-    a1 = 40 + rssiBeacon1;
-    a2 = 40 + rssiBeacon2;
-    a3 = 40 + rssiBeacon3;
+  d1 = pow(10, (40 + rssiBeacon1) / (-55.4));
+  d2 = pow(10, (40 + rssiBeacon2) / (-55.4););
+  d3 = pow(10, (40 + rssiBeacon3) / (-55.4));
 
-    b1 = a1 / (-55.4);
-    b2 = a2 / (-55.4);
-    b3 = a3 / (-55.4);
+  x = ((pow(x1, 2) + pow(y1, 2) - pow(d1, 2)) * (y3 - y2) + (pow(x2, 2) + pow(y2, 2) - pow(d2, 2)) * (y1 - y3) + (pow(x3, 2) + pow(y3, 2) - pow(d3, 2)) * (y2 - y1)) / (2 * (x1 * (y3 - y2) + x2 * (y1 - y3) + x3 * (y2 - y1)));
+  y = ((pow(x1, 2) + pow(y1, 2) - pow(d1, 2)) * (x3 - x2) + (pow(x2, 2) + pow(y2, 2) - pow(d2, 2)) * (x1 - x3) + (pow(x3, 2) + pow(y3, 2) - pow(d3, 2)) * (x2 - x1)) / (2 * (y1 * (x3 - x2) + y2 * (x1 - x3) + y3 * (x2 - x1)));
 
-    d1 = pow(10, b1);
-    d2 = pow(10, b2);
-    d3 = pow(10, b3);
-
-    x = ((pow(x1, 2) + pow(y1, 2) - pow(d1, 2)) * (y3 - y2) + (pow(x2, 2) + pow(y2, 2) - pow(d2, 2)) * (y1 - y3) + (pow(x3, 2) + pow(y3, 2) - pow(d3, 2)) * (y2 - y1)) / (2 * (x1 * (y3 - y2) + x2 * (y1 - y3) + x3 * (y2 - y1)));
-    y = ((pow(x1, 2) + pow(y1, 2) - pow(d1, 2)) * (x3 - x2) + (pow(x2, 2) + pow(y2, 2) - pow(d2, 2)) * (x1 - x3) + (pow(x3, 2) + pow(y3, 2) - pow(d3, 2)) * (x2 - x1)) / (2 * (y1 * (x3 - x2) + y2 * (x1 - x3) + y3 * (x2 - x1)));
-
-    Serial.printf("RSSI Beacon1 -- %.1f\n", rssiBeacon1);
-    Serial.printf("RSSI Beacon2 -- %.1f\n", rssiBeacon2);
-    Serial.printf("RSSI Beacon3 -- %.1f\n", rssiBeacon3);
-    Serial.printf("Eixo x: %.1f\n", x);
-    Serial.printf("Eixo y: %.1f\n", y);
+  Serial.printf("RSSI Beacon1 -- %.1f\n", rssiBeacon1);
+  Serial.printf("RSSI Beacon2 -- %.1f\n", rssiBeacon2);
+  Serial.printf("RSSI Beacon3 -- %.1f\n", rssiBeacon3);
+  Serial.printf("Axis x: %.1f\n", x);
+  Serial.printf("Axis y: %.1f\n", y);
 
 
-    strX = String(x);
-    strY = String(y);
+  strX = String(x);
+  strY = String(y);
   server.handleClient();
 
   delay(5000);
